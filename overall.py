@@ -1,0 +1,2 @@
+location = 'John'
+username = 'Kaita'

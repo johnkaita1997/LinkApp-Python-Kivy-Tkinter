@@ -5,9 +5,11 @@ from kivy.config import Config
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.modalview import ModalView
 from kivy.clock import Clock
+from testmysql import mycursor, seccursor, db
+import overall
 
 Config.set('graphics', 'resizable', False)
-import pyrebase
+from pyrebase import pyrebase
 
 
 Builder.load_file('BaseLogin/login.kv')
@@ -22,6 +24,8 @@ class LoginWindow(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        db.autocommit = True
+
         self.firebaseconfig = {
             "apiKey": "AIzaSyDGsXv0wa7Fc4irPi3MX_uWTIfuWHeEIzU",
             "authDomain": "projectId.firebaseapp.com",
@@ -33,102 +37,85 @@ class LoginWindow(BoxLayout):
         self.auth = self.firebase.auth()
         self.db = self.firebase.database()
 
+        self.ulocation = ''
+        self.uusername= ''
+
         self.notify = Notify()
+        self.branch = self.ids.branch
+
+        #Load the values for the spinner
+        # Get the credential using password
+        mycursor.execute('SELECT * FROM  braches')
+        data = mycursor.fetchall()  # get the data in data variabl
+        newList = [value[0] for value in data]
+        self.branch.values = newList
+        # Add the spinner onclickListener
+        self.branch.bind(text=self.on_spinner_select)
+
+    def Convert(lst):
+        res_dct = {lst[i]: lst[i + 1] for i in range(0, len(lst), 2)}
+        return res_dct
+
+    def on_spinner_select(self, spinner, text):
+        self.spinnertext = text
+        # Add Widgets to
+        self.ulocation = self.spinnertext
+        #Add the active location to the database
+
 
     def killswitch(self, dtx):
         self.notify.dismiss()
         self.notify.clear_widgets()
 
-
-    def get_users(self):
-        self.users = self.db.child("users").get()
-        name = []
-        mobile = []
-        id = []
-        designation = []
-
-        for user in self.users.each():
-            key = user.key()
-
-            retrieve_name = self.db.child("users").child(key).child("name").get().val()
-            name.append(retrieve_name)
-
-            retrieve_mobile = self.db.child("users").child(key).child("mobile").get().val()
-            mobile.append(retrieve_mobile)
-
-            retrieve_id = self.db.child("users").child(key).child("id").get().val()
-            id.append(retrieve_id)
-
-            retrieve_designation = self.db.child("users").child(key).child("designation").get().val()
-            designation.append(retrieve_designation)
-
-        return (name)
-
-
-    def get_products(self):
-
-        self.users = self.db.child("stocks").get()
-
-        product_name = []
-        product_code = []
-        productinstock = []
-        productsold = []
-        lastpurchased = []
-
-        for user in self.users.each():
-            key = user.key()
-
-            retrieve_name = self.db.child("users").child(key).child("product_name").get().val()
-            product_name.append(retrieve_name)
-
-            retrieve_mobile = self.db.child("users").child(key).child("product_code").get().val()
-            product_code.append(retrieve_mobile)
-
-            retrieve_id = self.db.child("users").child(key).child("productinstock").get().val()
-            productinstock.append(retrieve_id)
-
-            retrieve_designation = self.db.child("users").child(key).child("productsold").get().val()
-            productsold.append(retrieve_designation)
-
-            productsold = self.db.child("users").child(key).child("lastpurchased").get().val()
-            productsold.append(lastpurchased)
-
-
-        return (product_name)
-
-
-
     def login_user(self):
-        theemail = self.ids.email.text
-        thepassword = self.ids.password.text
-
-        if theemail ==  '' or thepassword == '':
-            self.notify.add_widget(Label(text='[color=#FF0000][b]All Fields Required[/b][/color]', markup=True))
+        if(self.ulocation == ''):
+            self.notify.add_widget(Label(text='[color=#FF0000][b]Select location[/b][/color]', markup=True))
             self.notify.open()
-            Clock.schedule_once(self.killswitch, 1)
-
+            Clock.schedule_once(self.killswitch, 3)
         else:
-            #Get the credential using password
-            operation = self.db.child("users").child(thepassword).child('designation').get().val()
+            theemail = self.ids.email.text
+            thepassword = self.ids.password.text
 
-            if operation == '' or operation == None:
-                self.notify.add_widget(Label(text='[color=#FF0000][b]Wrong Credentials[/b][/color]', markup=True))
+            if theemail ==  '' or thepassword == '':
+                self.notify.add_widget(Label(text='[color=#FF0000][b]All Fields Required[/b][/color]', markup=True))
                 self.notify.open()
-                Clock.schedule_once(self.killswitch, 1)
+                Clock.schedule_once(self.killswitch, 3)
+
             else:
-                print(operation)
-                if operation == 'Administrator':
-                    self.parent.parent.current = 'scrn_admin'
-                elif operation == 'Operator':
-                    self.parent.parent.current = 'scrn_pos'
+                mycursor.execute("SELECT * FROM Users WHERE uid=%s", (thepassword,))
+                data = mycursor.fetchone()  # get the data in data variabl
+
+                if data:
+                    seccursor.execute('SELECT   *  FROM Users WHERE uid=%s', (thepassword,))
+                    secdata = seccursor.fetchone()
+                    self.uusername = secdata
+                    print(str(self.uusername[0]))
+
+                    name = 'john'
+                    mycursor.execute("DELETE  FROM active")
+                    mycursor.execute("""INSERT INTO Active (location, username)  VALUES (%(location)s, %(username)s)""",
+                                {'location': self.ulocation,
+                                 'username': str(self.uusername[0])})
+
+                    print('Done')
+
+                    operator = data[1]
+                    if operator == 'Administrator':
+                        self.parent.parent.current = 'scrn_admin'
+                    elif operator == 'Operator':
+                        self.parent.parent.current = 'scrn_pos'
+                    else:
+                        self.notify.add_widget(Label(text='[color=#FF0000][b]An error occured[/b][/color]', markup=True))
+                        self.notify.open()
+                        Clock.schedule_once(self.killswitch, 3)
+
                 else:
-                    self.notify.add_widget(Label(text='[color=#FF0000][b]An error occured[/b][/color]', markup=True))
+                    self.notify.add_widget(Label(text='[color=#FF0000][b]Wrong Credentials[/b][/color]', markup=True))
                     self.notify.open()
-                    Clock.schedule_once(self.killswitch, 1)
+                    Clock.schedule_once(self.killswitch, 3)
 
 
 class LogInApp(App):
-
     def build(self):
         return LoginWindow()
 

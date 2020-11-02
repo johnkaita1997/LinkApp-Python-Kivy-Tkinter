@@ -74,10 +74,13 @@
             size_hint_y: None
             height: 30
 
-            Label:
+            Button:
+                id: headerlabel
                 text: 'Cocab Tech Solutions POS'
                 size_hint_x: .6
                 bold: True
+                background_color: utils.get_color_from_hex('#5B2437')
+                on_release: root.checkifadmin()
                 color: (1,1,1,1)
                 canvas.before:
                     Color:
@@ -85,6 +88,7 @@
                     Rectangle:
                         size: self.size
                         pos: self.pos
+
 
 
             FlatButton:
@@ -199,20 +203,23 @@
                 size_hint_y: None
                 height: 40
 
-            StackLayout:
-                padding: 10
-                spacing: 10
-                id: thebox
+            ScrollView:
+                id: scroll
                 size_hint_y: .8
-                size_hint_x: 1
-                canvas.before:
-                    Color:
-                        rgba: (1, 1, 1, 1)
-                    Rectangle:
-                        size: self.size
-                        pos: self.pos
 
-                Widget:
+                StackLayout:
+                    padding: 10
+                    spacing: 10
+                    id: thebox
+                    size_hint_x: 1
+                    canvas.before:
+                        Color:
+                            rgba: (1, 1, 1, 1)
+                        Rectangle:
+                            size: self.size
+                            pos: self.pos
+
+                    Widget:
 
         #END OF THE LISTVIEW BOX
 
@@ -275,10 +282,15 @@
                 TextInput
                     write_tab: False
                     multiline: False
-                    on_text_validate: root.change_discount()
                     size_hint_x: .3
                     id: discount
-                    hint_text: 'Disc per prod'
+                    hint_text: 'Total Discount'
+
+                Button:
+                    size_hint_x: .2
+                    text: "Disc"
+                    on_release: root.change_discount()
+
 
             #BOX FOR SHOP NAME
             BoxLayout:
@@ -298,23 +310,51 @@
 
             #BOX FOR DYNAMIC ITEMS
 
-            StackLayout:
-                padding: 10
-                size_hint_Y: 1
-                size_hint_y: .8
-                id: receipt_Preview
+            ScrollView:
+                id: scrollView
+                StackLayout:
+                    padding: 10
+                    size_hint_Y: 1
+                    size_hint_y: .8
+                    id: receipt_Preview
 
             #END OF THE DYNAMIC ITEMS
 
 
             #BEGIN OF LAST BOX
             BoxLayout:
-                size_hint_y: .2
+                size_hint_y: .3
                 id: theending
                 orientation: 'vertical'
-                Button:
-                    id: thetotal
-                    text: "Total : 0.0"
+
+                BoxLayout:
+                    orientation: 'horizontal'
+
+                    Button:
+                        id: thetotal
+                        text: "Total : 0.0"
+
+                    Button:
+                        id: thebalance
+                        text: "Bal : 0.0"
+
+                BoxLayout:
+                    id: show
+                    orintation: 'horizontal'
+
+                    TextInput:
+                        id: amountinput
+                        multiline: False
+                        hint_text:'Amount Entered'
+                        input_filter: 'int'
+                        on_text: root.error = ''
+
+                    TextInput:
+                        id: mpesacode
+                        multiline: False
+                        hint_text:'Code'
+                        on_text: root.error = ''
+
                 BoxLayout:
 
                     Spinner:
@@ -326,6 +366,11 @@
                         size_hint_x: .2
                         text: "clear"
                         on_release: root.clearWidgets()
+
+                    Spinner:
+                        id: paymenthold
+                        size_hint_x: .2
+                        text: "Customer"
 
                     Button:
                         size_hint_x: .2
@@ -345,6 +390,7 @@
                 size: self.size
         id: footer
         Label:
+            id: namelabel
             text: "System Maintained by Cocab Tech Solutions (0729836000)"
 
 
