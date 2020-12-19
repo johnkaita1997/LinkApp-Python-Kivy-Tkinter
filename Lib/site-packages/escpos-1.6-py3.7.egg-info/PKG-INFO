@@ -1,0 +1,21 @@
+Metadata-Version: 1.1
+Name: escpos
+Version: 1.6
+Summary: Python library to manipulate ESC/POS Printers
+Home-page: http://www.bitbucket.org/presik/python_escpos/
+Author: Oscar Alvarez
+Author-email: oscar.alvarez.montero@gmail.com
+License: LGPL
+Download-URL: http://www.bitbucket.org/presik/python_escpos/
+Description: UNKNOWN
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3
+Classifier: Topic :: Printing
+Classifier: Topic :: Software Development :: Libraries
+Classifier: Topic :: Software Development :: Libraries :: Python Modules

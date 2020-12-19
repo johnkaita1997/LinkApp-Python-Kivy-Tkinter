@@ -1,5 +1,5 @@
-from kivy.uix.boxlayout import BoxLayout
 from kivy.lang import Builder
+from kivy.uix.boxlayout import BoxLayout
 
 Builder.load_string('''
 <DataTable>:
@@ -9,7 +9,7 @@ Builder.load_string('''
         id: table_floor
         RecycleGridLayout:
             id:  table_floor_layout
-            cols: 5 #We have 5 tittles
+            rows: 4 #We have 5 tittles
             default_size: (None, 250)
             default_size_hint: (1, None)
             size_hint_y: None
@@ -48,7 +48,7 @@ class DataTable(BoxLayout):
                 table_data.append(
                     {'text': str(products[t][r]), 'size_hint_y': None, 'height': 30, 'bcolor': (.06, .25, .25, 1)})
 
-        self.ids.table_floor_layout.cols = self.columns
+        self.ids.table_floor_layout.rows = self.columns
         # Passing the data to the recycleviews
         self.ids.table_floor.data = table_data
 
